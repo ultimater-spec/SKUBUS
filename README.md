@@ -23,3 +23,4 @@ A comprehensive school bus management system built with the MERN stack.
    npm run dev
    ```
    This will start both the React frontend and the Express backend concurrently.
+"#SKUBUS" 
