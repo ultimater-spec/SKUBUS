@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: skubus-backend
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CLIENT_URL
+        value: https://skubus.vercel.app
+      - key: MONGODB_URI
+        value: mongodb+srv://vasudevsanthosh23_db_user:uGv4YaZpA4DlcdWl@cluster0.c8wxywp.mongodb.net/skubus?retryWrites=true&w=majority
+      - key: JWT_SECRET
+        value: your_jwt_secret
+      - key: JWT_EXPIRES_IN
+        value: 7d
