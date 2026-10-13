@@ -20,6 +20,11 @@ export const updateComplaint = async (id, data) => {
   return response.data;
 };
 
+export const addComplaintMessage = async (id, messageData) => {
+  const response = await api.post(`/complaints/${id}/messages`, messageData);
+  return response.data;
+};
+
 export const deleteComplaint = async (id) => {
   const response = await api.delete(`/complaints/${id}`);
   return response.data;

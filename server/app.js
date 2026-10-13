@@ -12,6 +12,8 @@ import busRoutes from './routes/busRoutes.js';
 import routeRoutes from './routes/routeRoutes.js';
 import attendanceRoutes from './routes/attendanceRoutes.js';
 import complaintRoutes from './routes/complaintRoutes.js';
+import ticketRoutes from './routes/ticketRoutes.js';
+import staffEnquiryRoutes from './routes/staffEnquiryRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 
@@ -104,6 +106,12 @@ app.use('/attendance', attendanceRoutes);
 
 app.use('/api/complaints', complaintRoutes);
 app.use('/complaints', complaintRoutes);
+
+app.use('/api/tickets', ticketRoutes);
+app.use('/tickets', ticketRoutes);
+
+app.use('/api/enquiries', staffEnquiryRoutes);
+app.use('/enquiries', staffEnquiryRoutes);
 
 app.use('/api/notifications', notificationRoutes);
 app.use('/notifications', notificationRoutes);

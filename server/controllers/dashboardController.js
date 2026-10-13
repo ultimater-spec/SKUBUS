@@ -4,6 +4,8 @@ import Staff from '../models/Staff.js';
 import Bus from '../models/Bus.js';
 import Attendance from '../models/Attendance.js';
 import Complaint from '../models/Complaint.js';
+import Ticket from '../models/Ticket.js';
+import StaffEnquiry from '../models/StaffEnquiry.js';
 import Notification from '../models/Notification.js';
 import User from '../models/User.js';
 
@@ -13,7 +15,19 @@ export const getDashboardStats = async (req, res, next) => {
     const totalParents = await Parent.countDocuments();
     const totalStaff = await Staff.countDocuments();
     const activeBuses = await Bus.countDocuments({ status: 'active' });
-    const pendingComplaints = await Complaint.countDocuments({ status: 'pending' });
+    const totalComplaints = await Complaint.countDocuments();
+    const pendingComplaints = await Complaint.countDocuments({ status: { $in: ['pending', 'under_review', 'in_progress'] } });
+    const urgentComplaints = await Complaint.countDocuments({ priority: 'urgent', status: { $ne: 'resolved' } });
+    
+    const totalTickets = await Ticket.countDocuments();
+    const openTickets = await Ticket.countDocuments({ status: { $in: ['open', 'in_progress', 'waiting_for_parent'] } });
+
+    const totalEnquiries = await StaffEnquiry.countDocuments();
+    const escalatedEnquiries = await StaffEnquiry.countDocuments({ isEscalated: true, status: { $ne: 'resolved' } });
+
+    const resolvedIssues = (await Complaint.countDocuments({ status: 'resolved' })) +
+                           (await Ticket.countDocuments({ status: { $in: ['resolved', 'closed'] } })) +
+                           (await StaffEnquiry.countDocuments({ status: 'resolved' }));
 
     // Calculate today's attendance percentage
     const startOfDay = new Date();
@@ -40,7 +54,14 @@ export const getDashboardStats = async (req, res, next) => {
         totalStaff,
         activeBuses,
         todayAttendance,
-        pendingComplaints
+        totalComplaints,
+        pendingComplaints,
+        urgentComplaints,
+        totalTickets,
+        openTickets,
+        totalEnquiries,
+        escalatedEnquiries,
+        resolvedIssues
       }
     });
   } catch (error) {

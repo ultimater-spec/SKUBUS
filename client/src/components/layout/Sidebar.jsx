@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Bus, Home, Users, UserCheck, ShieldAlert, LogOut, X, Camera, 
-  Map, Bell, BarChart3, Settings, Briefcase
+  Map, Bell, BarChart3, Settings, Briefcase, MessageSquare
 } from 'lucide-react';
 import { logout } from '../../store/slices/authSlice';
 
@@ -36,11 +36,19 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   ];
 
   const parentLinks = [
+    { type: 'header', name: 'OVERVIEW' },
     { name: 'Dashboard', path: '/parent/dashboard', icon: Home },
-    { name: 'My Children', path: '/parent/children', icon: Users },
+    { name: 'My Children', path: '/parent/dashboard?tab=children', icon: Users },
+    
+    { type: 'header', name: 'COMMUNICATION' },
+    { name: 'Complaints', path: '/parent/dashboard?tab=complaints', icon: ShieldAlert },
+    { name: 'Support Tickets', path: '/parent/dashboard?tab=tickets', icon: MessageSquare },
+    { name: 'Staff Enquiry', path: '/parent/dashboard?tab=staff', icon: Briefcase },
+    { name: 'Notifications', path: '/parent/dashboard?tab=notifications', icon: Bell },
   ];
 
   const staffLinks = [
+    { type: 'header', name: 'OVERVIEW' },
     { name: 'Dashboard', path: '/staff/dashboard', icon: Home },
     { name: 'Scanner', path: '/staff/scanner', icon: Camera },
   ];
@@ -52,6 +60,13 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
   const handleLogout = () => {
     dispatch(logout());
+  };
+
+  const isLinkActive = (path) => {
+    if (path.includes('?')) {
+      return `${location.pathname}${location.search}` === path;
+    }
+    return location.pathname === path && !location.search;
   };
 
   return (
@@ -94,7 +109,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                 );
               }
 
-              const isActive = location.pathname.startsWith(link.path);
+              const isActive = isLinkActive(link.path);
               const Icon = link.icon;
               return (
                 <Link

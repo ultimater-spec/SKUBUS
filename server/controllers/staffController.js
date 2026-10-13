@@ -1,6 +1,24 @@
 import Staff from '../models/Staff.js';
 import User from '../models/User.js';
+import Bus from '../models/Bus.js';
+import Route from '../models/Route.js';
 import bcrypt from 'bcryptjs';
+
+export const getMyStaffProfile = async (req, res, next) => {
+  try {
+    const staff = await Staff.findOne({ user: req.user._id })
+      .populate('user', 'name email phone role profileImage isActive')
+      .populate('assignedBus', 'busNumber registrationNumber model driver attendant')
+      .populate('assignedRoute', 'routeName routeNumber stops startingPoint destination');
+      
+    if (!staff) {
+      return res.status(404).json({ status: false, message: "Staff profile not found" });
+    }
+    res.status(200).json({ status: true, message: "Staff profile fetched successfully", data: staff });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getStaff = async (req, res, next) => {
   try {

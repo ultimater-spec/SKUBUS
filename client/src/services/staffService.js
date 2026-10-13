@@ -1,5 +1,10 @@
 import api from './api';
 
+export const getMyStaffProfile = async () => {
+  const response = await api.get('/staff/my-profile');
+  return response.data;
+};
+
 export const getStaff = async () => {
   const response = await api.get('/staff');
   return response.data;

@@ -24,7 +24,14 @@ const AdminDashboard = () => {
     totalStaff: 0,
     activeBuses: 0,
     todayAttendance: '0%',
-    pendingComplaints: 0
+    totalComplaints: 0,
+    pendingComplaints: 0,
+    urgentComplaints: 0,
+    totalTickets: 0,
+    openTickets: 0,
+    totalEnquiries: 0,
+    escalatedEnquiries: 0,
+    resolvedIssues: 0
   });
   
   const [attendanceData, setAttendanceData] = useState([]);
@@ -50,7 +57,9 @@ const AdminDashboard = () => {
       const safeData = (result, fallback) => result.status === 'fulfilled' && result.value?.data ? result.value.data : fallback;
 
       setStats(safeData(results[0], {
-        totalStudents: 0, totalParents: 0, totalStaff: 0, activeBuses: 0, todayAttendance: '0%', pendingComplaints: 0
+        totalStudents: 0, totalParents: 0, totalStaff: 0, activeBuses: 0, todayAttendance: '0%',
+        totalComplaints: 0, pendingComplaints: 0, urgentComplaints: 0,
+        totalTickets: 0, openTickets: 0, totalEnquiries: 0, escalatedEnquiries: 0, resolvedIssues: 0
       }));
       setAttendanceData(safeData(results[1], []));
       setRecentAttendance(safeData(results[2], []));
@@ -394,13 +403,63 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* Recent Complaints */}
+          {/* Communication & Support Management */}
           <div className="bg-white rounded-2xl shadow-sm border border-sk-border overflow-hidden flex flex-col">
             <div className="p-5 border-b border-sk-border flex justify-between items-center bg-gray-50/50">
               <h2 className="text-lg font-bold text-sk-navy flex items-center gap-2">
-                <ShieldAlert className="w-5 h-5 text-gray-400" /> Recent Complaints
+                <ShieldAlert className="w-5 h-5 text-sk-yellow-dark" /> Communication & Support
               </h2>
+              <Link to="/admin/complaints" className="text-xs font-bold text-sk-navy hover:underline">
+                Open Center →
+              </Link>
             </div>
+
+            {/* Quick Metrics Strip */}
+            <div className="grid grid-cols-3 gap-1 p-3 bg-gray-50 border-b border-gray-100 text-center text-xs">
+              <Link to="/admin/complaints?tab=complaints" className="p-2 rounded-xl hover:bg-white transition">
+                <span className="font-extrabold text-sk-navy block text-base">{stats.totalComplaints || 0}</span>
+                <span className="text-[10px] text-gray-500 font-semibold uppercase">Complaints</span>
+                {stats.pendingComplaints > 0 && (
+                  <span className="inline-block mt-0.5 text-[9px] font-bold text-red-600 bg-red-100 px-1 rounded">
+                    {stats.pendingComplaints} pend
+                  </span>
+                )}
+              </Link>
+
+              <Link to="/admin/complaints?tab=tickets" className="p-2 rounded-xl hover:bg-white transition">
+                <span className="font-extrabold text-sk-navy block text-base">{stats.totalTickets || 0}</span>
+                <span className="text-[10px] text-gray-500 font-semibold uppercase">Tickets</span>
+                {stats.openTickets > 0 && (
+                  <span className="inline-block mt-0.5 text-[9px] font-bold text-blue-600 bg-blue-100 px-1 rounded">
+                    {stats.openTickets} open
+                  </span>
+                )}
+              </Link>
+
+              <Link to="/admin/complaints?tab=enquiries" className="p-2 rounded-xl hover:bg-white transition">
+                <span className="font-extrabold text-sk-navy block text-base">{stats.totalEnquiries || 0}</span>
+                <span className="text-[10px] text-gray-500 font-semibold uppercase">Enquiries</span>
+                {stats.escalatedEnquiries > 0 && (
+                  <span className="inline-block mt-0.5 text-[9px] font-bold text-red-600 bg-red-100 px-1 rounded animate-pulse">
+                    {stats.escalatedEnquiries} esc
+                  </span>
+                )}
+              </Link>
+            </div>
+
+            {/* Urgent Alert Banner */}
+            {stats.urgentComplaints > 0 && (
+              <div className="m-3 p-2.5 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between text-xs text-red-900 font-bold">
+                <span className="flex items-center gap-1.5">
+                  <AlertCircle className="w-4 h-4 text-red-600" /> {stats.urgentComplaints} Urgent Complaint(s) Pending!
+                </span>
+                <Link to="/admin/complaints?tab=complaints" className="text-[11px] underline text-red-700">
+                  Review
+                </Link>
+              </div>
+            )}
+
+            {/* Recent Complaints List */}
             <div className="p-2 min-h-[100px]">
               {loading ? (
                 <div className="space-y-3 p-3">
@@ -409,30 +468,40 @@ const AdminDashboard = () => {
                 </div>
               ) : recentComplaints.length > 0 ? (
                 recentComplaints.map((comp) => (
-                  <div key={comp.id} className="p-4 hover:bg-gray-50 rounded-xl transition-colors border-b last:border-0 border-gray-100">
-                    <div className="flex justify-between items-start mb-2">
-                      <p className="text-sm font-semibold text-sk-navy">{comp.subject}</p>
+                  <Link 
+                    key={comp.id} 
+                    to="/admin/complaints?tab=complaints"
+                    className="p-3.5 hover:bg-gray-50 rounded-xl transition-colors border-b last:border-0 border-gray-100 block group"
+                  >
+                    <div className="flex justify-between items-start mb-1.5">
+                      <p className="text-xs font-bold text-sk-navy group-hover:text-sk-yellow-dark transition truncate max-w-[200px]">
+                        {comp.subject}
+                      </p>
                       <StatusBadge status={comp.status} />
                     </div>
-                    <div className="flex justify-between items-center text-xs text-gray-500">
+                    <div className="flex justify-between items-center text-[11px] text-gray-500">
                       <span className="flex items-center gap-1"><User className="w-3 h-3"/> {comp.parent}</span>
                       <span>{comp.date}</span>
                     </div>
-                  </div>
+                  </Link>
                 ))
               ) : (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <div className="bg-gray-50 p-3 rounded-full mb-3 text-gray-400">
-                    <ShieldAlert className="w-6 h-6" />
+                <div className="flex flex-col items-center justify-center py-6 text-center">
+                  <div className="bg-gray-50 p-2.5 rounded-full mb-2 text-gray-400">
+                    <ShieldAlert className="w-5 h-5" />
                   </div>
-                  <h3 className="text-sm font-semibold text-sk-navy mb-1">No complaints received yet.</h3>
-                  <p className="text-xs text-gray-500">Everything is running smoothly.</p>
+                  <h3 className="text-xs font-semibold text-sk-navy mb-0.5">No complaints received yet.</h3>
+                  <p className="text-[11px] text-gray-500">All parent communication is clear.</p>
                 </div>
               )}
             </div>
-            <div className="p-3 border-t border-sk-border text-center shrink-0">
-              <Link to="/admin/complaints" className="text-sm font-medium text-sk-info hover:underline flex items-center justify-center gap-1">
-                View all complaints <ArrowRight className="w-4 h-4" />
+
+            <div className="p-3 border-t border-sk-border text-center shrink-0 flex items-center justify-between text-xs px-4">
+              <span className="text-gray-500 font-medium">
+                Resolved: <strong className="text-emerald-600">{stats.resolvedIssues || 0}</strong>
+              </span>
+              <Link to="/admin/complaints" className="font-bold text-sk-navy hover:underline flex items-center gap-1">
+                Manage all issues <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           </div>

@@ -20,6 +20,16 @@ export const updateParent = async (id, parentData) => {
   return response.data;
 };
 
+export const getMyParentProfile = async () => {
+  const response = await api.get('/parents/my-profile');
+  return response.data;
+};
+
+export const getAssignedStaff = async () => {
+  const response = await api.get('/parents/assigned-staff');
+  return response.data;
+};
+
 export const deleteParent = async (id) => {
   const response = await api.delete(`/parents/${id}`);
   return response.data;
