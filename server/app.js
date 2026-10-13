@@ -47,6 +47,7 @@ const corsOptions = {
     const cleanOrigin = origin.trim().replace(/\/+$/, '');
     const isAllowed = allowedOrigins.includes(cleanOrigin) || 
       cleanOrigin.endsWith('.vercel.app') || 
+      cleanOrigin.endsWith('.onrender.com') ||
       cleanOrigin.includes('localhost') || 
       cleanOrigin.includes('127.0.0.1');
 

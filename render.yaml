@@ -1,4 +1,5 @@
 services:
+  # Backend API Web Service
   - type: web
     name: skubus-backend
     runtime: node
@@ -9,11 +10,28 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 10000
       - key: CLIENT_URL
         value: https://skubus.vercel.app
       - key: MONGODB_URI
-        value: mongodb+srv://vasudevsanthosh23_db_user:uGv4YaZpA4DlcdWl@cluster0.c8wxywp.mongodb.net/skubus?retryWrites=true&w=majority
+        sync: false
       - key: JWT_SECRET
-        value: your_jwt_secret
+        sync: false
       - key: JWT_EXPIRES_IN
         value: 7d
+
+  # Frontend Static Site (Render)
+  - type: web
+    name: skubus-frontend
+    runtime: static
+    rootDir: client
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        sync: false
