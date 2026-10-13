@@ -90,18 +90,40 @@ export const validateFace = async (req, res, next) => {
   try {
     const { image } = req.body;
     if (!image) {
-      return res.status(400).json({ status: false, message: "No image provided" });
+      return res.status(400).json({ status: false, message: "No image provided. Please select or capture a photo." });
     }
 
+    // Type and format validation
+    if (typeof image !== 'string' || !image.startsWith('data:image/')) {
+      return res.status(400).json({ 
+        status: false, 
+        message: "Invalid image format. Must be a valid JPEG, PNG, or WebP base64 image." 
+      });
+    }
+
+    // Max 5MB size validation on base64 data
+    const base64Data = image.split(',')[1] || '';
+    const approxBytes = (base64Data.length * 3) / 4;
+    if (approxBytes > 5 * 1024 * 1024) {
+      return res.status(400).json({ 
+        status: false, 
+        message: "Image file size exceeds the 5MB maximum limit. Please choose a smaller photo." 
+      });
+    }
+
+    const faceServiceUrl = process.env.FACE_SERVICE_URL || 'http://127.0.0.1:5001';
     try {
       // Forward to python microservice
-      const pythonResponse = await axios.post('http://127.0.0.1:5001/api/face/validate', { image });
+      const pythonResponse = await axios.post(`${faceServiceUrl}/api/face/validate`, { image }, { timeout: 10000 });
       return res.status(200).json(pythonResponse.data);
     } catch (pyError) {
-      if (pyError.response) {
+      if (pyError.response?.data) {
         return res.status(200).json(pyError.response.data);
       }
-      return res.status(503).json({ status: false, message: "Face Recognition Service is unavailable" });
+      return res.status(503).json({ 
+        status: false, 
+        message: "Face Recognition Service is unavailable. Please ensure the Python microservice is running on port 5001." 
+      });
     }
   } catch (error) {
     next(error);
@@ -110,14 +132,55 @@ export const validateFace = async (req, res, next) => {
 
 export const registerFace = async (req, res, next) => {
   try {
-    const { encodings } = req.body;
-    if (!encodings || encodings.length === 0) {
-      return res.status(400).json({ status: false, message: "No face encodings provided" });
+    let { encodings, encoding, image } = req.body;
+
+    // If an image is provided directly without pre-extracted encodings, extract via face service
+    if (!encodings && !encoding && image) {
+      if (typeof image !== 'string' || !image.startsWith('data:image/')) {
+        return res.status(400).json({ 
+          status: false, 
+          message: "Invalid image format. Must be a valid JPEG, PNG, or WebP base64 image." 
+        });
+      }
+
+      const base64Data = image.split(',')[1] || '';
+      const approxBytes = (base64Data.length * 3) / 4;
+      if (approxBytes > 5 * 1024 * 1024) {
+        return res.status(400).json({ 
+          status: false, 
+          message: "Image file size exceeds the 5MB maximum limit." 
+        });
+      }
+
+      const faceServiceUrl = process.env.FACE_SERVICE_URL || 'http://127.0.0.1:5001';
+      try {
+        const pythonResponse = await axios.post(`${faceServiceUrl}/api/face/validate`, { image }, { timeout: 10000 });
+        if (!pythonResponse.data?.status || !pythonResponse.data?.data?.encoding) {
+          return res.status(400).json({ 
+            status: false, 
+            message: pythonResponse.data?.message || "No valid face detected in the photo. Please align the student's face." 
+          });
+        }
+        encoding = pythonResponse.data.data.encoding;
+      } catch (pyError) {
+        if (pyError.response?.data?.message) {
+          return res.status(400).json({ status: false, message: pyError.response.data.message });
+        }
+        return res.status(503).json({ 
+          status: false, 
+          message: "Face Recognition Service is unavailable. Please ensure the Python microservice is running on port 5001." 
+        });
+      }
     }
 
-    // Average the 5 encodings for better accuracy
+    if (!encodings && !encoding) {
+      return res.status(400).json({ status: false, message: "No face encodings or photo provided." });
+    }
+
     let avgEncoding = [];
-    if (encodings.length > 0) {
+    if (encoding && Array.isArray(encoding)) {
+      avgEncoding = encoding;
+    } else if (encodings && Array.isArray(encodings) && encodings.length > 0) {
       const numFeatures = encodings[0].length;
       avgEncoding = new Array(numFeatures).fill(0);
       for (let enc of encodings) {
@@ -130,10 +193,15 @@ export const registerFace = async (req, res, next) => {
       }
     }
 
-    // Check for duplicate faces
+    if (!avgEncoding || avgEncoding.length === 0) {
+      return res.status(400).json({ status: false, message: "Could not calculate face feature vectors." });
+    }
+
+    // Check for duplicate faces across OTHER students
     const allStudents = await Student.find({ faceRecognitionEnabled: true });
     for (let s of allStudents) {
       if (s._id.toString() === req.params.id) continue;
+      if (!s.faceEncoding || !Array.isArray(s.faceEncoding)) continue;
       
       // Calculate euclidean distance
       let distance = 0;
@@ -151,10 +219,16 @@ export const registerFace = async (req, res, next) => {
       }
     }
 
-    const student = await Student.findByIdAndUpdate(req.params.id, {
+    const updateData = {
       faceRecognitionEnabled: true,
       faceEncoding: avgEncoding
-    }, { new: true });
+    };
+
+    if (image && typeof image === 'string' && image.startsWith('data:image/')) {
+      updateData.profileImage = image;
+    }
+
+    const student = await Student.findByIdAndUpdate(req.params.id, updateData, { new: true });
     
     if (!student) {
       return res.status(404).json({ status: false, message: "Student not found" });
@@ -164,6 +238,8 @@ export const registerFace = async (req, res, next) => {
       status: true, 
       message: "Student face registered successfully", 
       data: {
+        id: student._id,
+        name: student.name,
         studentId: student.studentId,
         registered: true
       }

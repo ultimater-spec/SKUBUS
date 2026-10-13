@@ -30,8 +30,12 @@ export const registerFace = async (id, faceData) => {
   return response.data;
 };
 
-export const validateFace = async (id, imageData) => {
-  const response = await api.post(`/students/${id}/face/validate`, { image: imageData });
+export const validateFace = async (idOrImage, maybeImage) => {
+  if (maybeImage) {
+    const response = await api.post(`/students/${idOrImage}/face/validate`, { image: maybeImage });
+    return response.data;
+  }
+  const response = await api.post('/students/face/validate', { image: idOrImage });
   return response.data;
 };
 

@@ -16,6 +16,9 @@ const router = express.Router();
 router.use(protect);
 router.use(authorize('admin'));
 
+router.route('/face/validate')
+  .post(validateFace);
+
 router.route('/')
   .get(getStudents)
   .post(createStudent);

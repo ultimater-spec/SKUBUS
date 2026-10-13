@@ -90,8 +90,8 @@ const StudentDetails = () => {
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-2 mt-4 md:mt-0">
-          <button onClick={() => navigate(`/admin/students/${student._id}/face-registration`)} className="flex items-center gap-2 px-4 py-2 border border-blue-200 text-blue-600 bg-blue-50 rounded-lg text-sm font-semibold hover:bg-blue-100 transition-colors">
-            <Camera className="w-4 h-4" /> Face Setup
+          <button onClick={() => navigate(`/admin/students/${student._id}/face-registration`)} className="flex items-center gap-2 px-4 py-2 border border-sk-yellow text-sk-navy bg-sk-yellow-background rounded-lg text-sm font-bold hover:bg-sk-yellow-light transition-colors shadow-sm">
+            <Camera className="w-4 h-4 text-sk-navy" /> {student.faceRecognitionEnabled ? 'Update Face' : 'Register Face'}
           </button>
           <button onClick={() => navigate(`/admin/students/${student._id}/edit`)} className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-700 bg-white rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors">
             <Edit className="w-4 h-4" /> Edit
@@ -221,10 +221,18 @@ const StudentDetails = () => {
                   <p className="text-xs text-gray-500">Biometric boarding status</p>
                 </div>
               </div>
-              <StatusBadge 
-                text={student.faceRecognitionEnabled ? "Registered" : "Not Registered"} 
-                status={student.faceRecognitionEnabled ? "success" : "gray"} 
-              />
+              <div className="flex items-center gap-3">
+                <StatusBadge 
+                  text={student.faceRecognitionEnabled ? "Registered" : "Not Registered"} 
+                  status={student.faceRecognitionEnabled ? "success" : "gray"} 
+                />
+                <button
+                  onClick={() => navigate(`/admin/students/${student._id}/face-registration`)}
+                  className="px-3 py-1 text-xs font-bold bg-sk-yellow text-sk-navy rounded-lg hover:bg-sk-yellow-dark transition-colors shadow-sm"
+                >
+                  {student.faceRecognitionEnabled ? "Update" : "Register"}
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-3 gap-2 text-center">

@@ -72,9 +72,17 @@ const StudentsList = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-sk-navy mb-1">Students</h1>
           <p className="text-gray-500 font-medium">Manage student information, transportation assignments, and attendance profiles.</p>
         </div>
-        <PrimaryButton onClick={() => navigate('/admin/students/create')} className="shrink-0 flex items-center gap-2">
-          <Plus className="w-5 h-5" /> Add Student
-        </PrimaryButton>
+        <div className="flex items-center gap-3 shrink-0">
+          <button 
+            onClick={() => navigate('/admin/students/face-registration')} 
+            className="flex items-center gap-2 px-4 py-2.5 border-2 border-sk-yellow bg-sk-yellow-background text-sk-navy font-bold rounded-xl hover:bg-sk-yellow-light transition-all shadow-sm"
+          >
+            <Camera className="w-5 h-5 text-sk-navy" /> Register Student Face
+          </button>
+          <PrimaryButton onClick={() => navigate('/admin/students/create')} className="flex items-center gap-2">
+            <Plus className="w-5 h-5" /> Add Student
+          </PrimaryButton>
+        </div>
       </div>
 
       {/* FILTERS & SEARCH */}
