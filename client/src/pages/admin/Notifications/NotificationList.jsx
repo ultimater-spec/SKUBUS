@@ -13,7 +13,7 @@ const NotificationList = () => {
       setLoading(true);
       const res = await getNotifications();
       if (res.status) {
-        setNotifications(res.data.data || []);
+        setNotifications(Array.isArray(res.data) ? res.data : (res.data?.data || []));
       }
     } catch (error) {
       toast.error('Failed to load notifications');

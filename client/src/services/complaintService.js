@@ -1,33 +1,27 @@
-import axios from 'axios';
-
-const API_URL = 'http://localhost:5000/api/complaints';
-
-const api = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,
-});
+import api from './api';
 
 export const getComplaints = async (params) => {
-  const response = await api.get('/', { params });
+  const response = await api.get('/complaints', { params });
   return response.data;
 };
 
 export const getComplaintById = async (id) => {
-  const response = await api.get(`/${id}`);
+  const response = await api.get(`/complaints/${id}`);
   return response.data;
 };
 
 export const createComplaint = async (data) => {
-  const response = await api.post('/', data);
+  const response = await api.post('/complaints', data);
   return response.data;
 };
 
 export const updateComplaint = async (id, data) => {
-  const response = await api.put(`/${id}`, data);
+  const response = await api.put(`/complaints/${id}`, data);
   return response.data;
 };
 
 export const deleteComplaint = async (id) => {
-  const response = await api.delete(`/${id}`);
+  const response = await api.delete(`/complaints/${id}`);
   return response.data;
 };
+

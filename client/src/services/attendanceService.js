@@ -1,33 +1,27 @@
-import axios from 'axios';
-
-const API_URL = 'http://localhost:5000/api/attendance';
-
-const api = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,
-});
+import api from './api';
 
 export const getAttendance = async (params) => {
-  const response = await api.get('/', { params });
+  const response = await api.get('/attendance', { params });
   return response.data;
 };
 
 export const getAttendanceById = async (id) => {
-  const response = await api.get(`/${id}`);
+  const response = await api.get(`/attendance/${id}`);
   return response.data;
 };
 
 export const markAttendance = async (data) => {
-  const response = await api.post('/', data);
+  const response = await api.post('/attendance', data);
   return response.data;
 };
 
 export const updateAttendance = async (id, data) => {
-  const response = await api.put(`/${id}`, data);
+  const response = await api.put(`/attendance/${id}`, data);
   return response.data;
 };
 
 export const deleteAttendance = async (id) => {
-  const response = await api.delete(`/${id}`);
+  const response = await api.delete(`/attendance/${id}`);
   return response.data;
 };
+

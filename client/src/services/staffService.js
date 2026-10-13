@@ -1,33 +1,27 @@
-import axios from 'axios';
-
-const API_URL = 'http://localhost:5000/api/staff';
-
-const api = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,
-});
+import api from './api';
 
 export const getStaff = async () => {
-  const response = await api.get('/');
+  const response = await api.get('/staff');
   return response.data;
 };
 
 export const getStaffById = async (id) => {
-  const response = await api.get(`/${id}`);
+  const response = await api.get(`/staff/${id}`);
   return response.data;
 };
 
 export const createStaff = async (staffData) => {
-  const response = await api.post('/', staffData);
+  const response = await api.post('/staff', staffData);
   return response.data;
 };
 
 export const updateStaff = async (id, staffData) => {
-  const response = await api.put(`/${id}`, staffData);
+  const response = await api.put(`/staff/${id}`, staffData);
   return response.data;
 };
 
 export const deleteStaff = async (id) => {
-  const response = await api.delete(`/${id}`);
+  const response = await api.delete(`/staff/${id}`);
   return response.data;
 };
+

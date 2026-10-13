@@ -6,8 +6,9 @@ import * as yup from 'yup';
 import { ArrowLeft, Bus as BusIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { createBus, getBusById, updateBus } from '../../../services/busService';
+import { getStaff } from '../../../services/staffService';
+import { getRoutes } from '../../../services/routeService';
 import PrimaryButton from '../../../components/ui/PrimaryButton';
-import axios from 'axios';
 
 const schema = yup.object().shape({
   busNumber: yup.string().required('Bus Number is required'),
@@ -35,11 +36,11 @@ const BusForm = () => {
     const fetchOptions = async () => {
       try {
         const [staffRes, routeRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/staff', { withCredentials: true }),
-          axios.get('http://localhost:5000/api/routes', { withCredentials: true })
+          getStaff(),
+          getRoutes()
         ]);
-        if (staffRes.data.status) setStaff(staffRes.data.data);
-        if (routeRes.data.status) setRoutes(routeRes.data.data);
+        if (staffRes.status) setStaff(staffRes.data);
+        if (routeRes.status) setRoutes(routeRes.data);
       } catch (err) {
         console.error('Failed to fetch staff/routes', err);
       }

@@ -6,8 +6,8 @@ import * as yup from 'yup';
 import { ArrowLeft, Map, Plus, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { createRoute, getRouteById, updateRoute } from '../../../services/routeService';
+import { getBuses } from '../../../services/busService';
 import PrimaryButton from '../../../components/ui/PrimaryButton';
-import axios from 'axios';
 
 const stopSchema = yup.object().shape({
   stopName: yup.string().required('Stop Name is required'),
@@ -40,8 +40,8 @@ const RouteForm = () => {
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const busRes = await axios.get('http://localhost:5000/api/buses', { withCredentials: true });
-        if (busRes.data.status) setBuses(busRes.data.data);
+        const busRes = await getBuses();
+        if (busRes.status) setBuses(busRes.data);
       } catch (err) {
         console.error('Failed to fetch buses', err);
       }

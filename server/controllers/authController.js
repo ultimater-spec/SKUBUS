@@ -91,12 +91,13 @@ export const login = async (req, res, next) => {
     user.lastLogin = Date.now();
     await user.save({ validateBeforeSave: false });
 
-    generateToken(res, user._id, user.role);
+    const token = generateToken(res, user._id, user.role);
 
     res.status(200).json({
       status: true,
       message: 'Login successful',
       data: {
+        token,
         user: {
           id: user._id,
           name: user.name,
@@ -113,8 +114,14 @@ export const login = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
   try {
+    const isProd = process.env.NODE_ENV === 'production' || 
+      process.env.COOKIE_SECURE === 'true' || 
+      Boolean(process.env.CLIENT_URL && !process.env.CLIENT_URL.includes('localhost'));
+
     res.cookie('token', '', {
       httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
       expires: new Date(0)
     });
     res.status(200).json({ status: true, message: 'Logout successful' });
